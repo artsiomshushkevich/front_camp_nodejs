@@ -1,0 +1,84 @@
+1 mongoimport --db frontcamp --collection restaurants --file ./mockdata/restaurants.json
+
+Result: 
+    2018-01-16T10:08:12.069+0300    connected to: localhost
+    2018-01-16T10:08:14.059+0300    [#######################.] frontcamp.restaurants        10.9MB/11.3MB (96.2%)
+    2018-01-16T10:08:14.173+0300    [########################] frontcamp.restaurants        11.3MB/11.3MB (100.0%)
+    2018-01-16T10:08:14.173+0300    imported 25359 documents
+
+2 
+    2.1 mongo
+        
+        Result:
+            MongoDB shell version v3.6.2
+            connecting to: mongodb://127.0.0.1:27017
+            MongoDB server version: 3.6.2
+            Server has startup warnings:
+            2018-01-16T00:05:40.247-0700 I CONTROL  [initandlisten]
+            2018-01-16T00:05:40.247-0700 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+            2018-01-16T00:05:40.254-0700 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+            2018-01-16T00:05:40.256-0700 I CONTROL  [initandlisten]
+            2018-01-16T00:05:40.258-0700 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+            2018-01-16T00:05:40.262-0700 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server.
+            2018-01-16T00:05:40.265-0700 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP
+            2018-01-16T00:05:40.268-0700 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+            2018-01-16T00:05:40.269-0700 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+            2018-01-16T00:05:40.274-0700 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+            2018-01-16T00:05:40.276-0700 I CONTROL  [initandlisten]
+            2018-01-16T00:05:40.279-0700 I CONTROL  [initandlisten]
+            2018-01-16T00:05:40.281-0700 I CONTROL  [initandlisten] ** WARNING: The file system cache of this machine is configured to be greater than 40% of the total memory. This can lead to increased memory pressure and poor performance.
+            2018-01-16T00:05:40.286-0700 I CONTROL  [initandlisten] See http://dochub.mongodb.org/core/wt-windows-system-file-cache
+            2018-01-16T00:05:40.289-0700 I CONTROL  [initandlisten]
+
+    2.2 use frontcamp
+
+        Result:
+            switched to db frontcamp
+
+    2.3. db.restaurants.count()
+
+        Result:
+            25359
+
+3
+    3.1 db.restaurants.find({$and: [{cuisine: 'Chinese'}, {borough: 'Queens'}]}).count()
+
+        Result:
+            728
+
+    3.2 db.restaurants.aggregate([{$unwind: "$grades"}, {$sort: {'grades.score'}}], {allowDiskUse: true})
+        
+        Result: 
+            _id  =  ObjectId("5a5da4dc0fb4f504a4b09545"), score = 131
+    
+    3.3 db.restaurants.update({borough: 'Manhattan'}, {$push: {grades: { grade: "A", score: 7, date: ISODate() }}}, {multi: true})
+        
+        Result:   
+            WriteResult({ "nMatched" : 10259, "nUpserted" : 0, "nModified" : 10259 })
+    
+    3.4 db.restaurants.find({'grades.8.score': {$lt: 7}}, {_id: 0, name: 1})
+
+        Result:
+            { "name" : "Silver Krust West Indian Restaurant" }
+            { "name" : "Pure Food" }
+    
+    3.5 db.restaurants.find({
+        cuisine: 'Seafood', 
+        grades: {
+            $elemMatch: {
+                $and:[
+                    {grade: 'B'},
+                    {
+                        $and:[
+                            {date:{$gt: ISODate('2014-02-01')}},
+                            {date:{$lt:ISODate('2014-03-01')}}
+                        ]
+                    }
+                ]
+            }
+        }
+    }, {name: 1})
+
+        Result:
+            { "_id" : ObjectId("5a5da4dd0fb4f504a4b0c74d"), "name" : "Los Primos Seafood Market" }
+            { "_id" : ObjectId("5a5da4dd0fb4f504a4b0c9c4"), "name" : "Catch" }
