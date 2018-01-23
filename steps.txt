@@ -1,0 +1,334 @@
+1
+    1.1 mongoimport.exe -d frontcamp -c airlines --type csv --headerline --file ./mockdata/airlines.csv
+
+        Result:
+            2018-01-23T11:10:12.203+0300    connected to: localhost
+            2018-01-23T11:10:14.169+0300    [#######.................] frontcamp.airlines
+            5.69MB/19.1MB (29.9%)
+            2018-01-23T11:10:17.169+0300    [##################......] frontcamp.airlines
+            14.4MB/19.1MB (75.8%)
+            2018-01-23T11:10:18.741+0300    [########################] frontcamp.airlines
+            19.1MB/19.1MB (100.0%)
+            2018-01-23T11:10:18.741+0300    imported 186648 documents
+    
+    1.1  db.airlines.count()
+        
+        Result:
+            186648
+
+2
+    2.1 
+        db.airlines.aggregate([{
+            $group: {
+                _id: {
+                    class: "$class"
+                },
+                total: { $sum: 1}
+            }},
+            {
+            $project: {
+                _id: 0,
+                class: "$_id.class",
+                total: 1
+            }}
+        ])
+
+        Result: 
+            /* 1 */
+            {
+                "total" : 140343.0,
+                "class" : "F"
+            }
+
+            /* 2 */
+            {
+                "total" : 23123.0,
+                "class" : "L"
+            }
+
+            /* 3 */
+            {
+                "total" : 5683.0,
+                "class" : "P"
+            }
+
+            /* 4 */
+            {
+                "total" : 17499.0,
+                "class" : "G"
+            }
+
+    2.2 
+        db.airlines.aggregate([
+            {
+                $match: {
+                destCountry: {$not: {$eq: "United States"}}
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        destCity: "$destCity"
+                    },
+                    avgPassengers: {$avg: "$passengers"}
+                }
+            },
+            {
+                $sort: {
+                    avgPassengers: -1
+                }
+            }, 
+            {
+                $limit: 3
+            },
+            {
+                $project: {
+                    _id: 0,
+                    city: "$_id.destCity",
+                    avgPassengers: 1,
+                    destCountry: 1
+                }
+                
+            }
+        ])
+
+        Result:
+
+            /* 1 */
+            {
+                "avgPassengers" : 8052.38095238095,
+                "city" : "Abu Dhabi, United Arab Emirates"
+            }
+
+            /* 2 */
+            {
+                "avgPassengers" : 7176.59663865546,
+                "city" : "Dubai, United Arab Emirates"
+            }
+
+            /* 3 */
+            {
+                "avgPassengers" : 7103.33333333333,
+                "city" : "Guangzhou, China"
+            }
+
+    2.3
+        db.airlines.aggregate([
+            {
+                $match: {
+                    destCountry: "Latvia"
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        destCountry: "$destCountry"
+                    },
+                    carriers: {
+                        $addToSet: "$carrier"
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: "$_id.destCountry",
+                    carriers: 1
+                }
+            }
+        
+        ])
+
+        Result: 
+
+            /* 1 */
+            {
+                "carriers" : [ 
+                    "Uzbekistan Airways", 
+                    "Blue Jet SP Z o o", 
+                    "JetClub AG"
+                ],
+                "_id" : "Latvia"
+            }
+
+    
+    2.4
+        db.airlines.aggregate([
+            {
+                $match: {
+                    destCountry: {$in: ["Italy", "Greece", "Spain"]},
+                    originCountry: "United States"
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        tempCarrier: "$carrier"
+                    },
+                    totalPassengers: { $sum: "$passengers"}
+                }
+            },
+            {
+                $sort: {
+                    totalPassengers: -1
+                }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $project: {
+                    _id: "$_id.tempCarrier",
+                    total: "$totalPassengers"
+                }
+            },
+            {
+                $skip: 3
+            }
+
+        
+        ])
+
+        Result: 
+
+            /* 1 */
+            {
+                "_id" : "Compagnia Aerea Italiana",
+                "total" : 280256
+            }
+
+            /* 2 */
+            {
+                "_id" : "United Air Lines Inc.",
+                "total" : 229936
+            }
+
+            /* 3 */
+            {
+                "_id" : "Emirates",
+                "total" : 100903
+            }
+
+            /* 4 */
+            {
+                "_id" : "Air Europa",
+                "total" : 94968
+            }
+
+            /* 5 */
+            {
+                "_id" : "Meridiana S.p.A",
+                "total" : 20308
+            }
+
+            /* 6 */
+            {
+                "_id" : "Norwegian Air Shuttle ASA",
+                "total" : 13344
+            }
+
+            /* 7 */
+            {
+                "_id" : "VistaJet Limited",
+                "total" : 183
+            }
+
+    2.5
+        db.airlines.aggregate([
+            {
+                $match: {
+                    originCountry: "United States"
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        originCity: "$originCity",
+                        originState: "$originState"
+                    },
+                    totalPassengers: {
+                        $sum: "$passengers"
+                    }
+                }
+            },
+            {
+                $sort: {
+                "_id.originState": 1,
+                "totalPassengers": -1,
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        originState: "$_id.originState"
+                    },
+                    city: {$first: "$_id.originCity"},
+                    totalPassengers: { $max: "$totalPassengers"}
+                }    
+            },
+            { 
+                $sort: {
+                    "_id.originState": 1
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    totalPassengers: 1,
+                    location: {
+                        city: "$city",
+                        state: "$_id.originState"
+                    }
+                }
+            },
+            
+        {
+            $limit: 5
+        }
+        ])
+
+        Result: 
+            /* 1 */
+            {
+                "totalPassengers" : 760120,
+                "location" : {
+                    "city" : "Birmingham, AL",
+                    "state" : "Alabama"
+                }
+            }
+
+            /* 2 */
+            {
+                "totalPassengers" : 1472404,
+                "location" : {
+                    "city" : "Anchorage, AK",
+                    "state" : "Alaska"
+                }
+            }
+
+            /* 3 */
+            {
+                "totalPassengers" : 13152753,
+                "location" : {
+                    "city" : "Phoenix, AZ",
+                    "state" : "Arizona"
+                }
+            }
+
+            /* 4 */
+            {
+                "totalPassengers" : 571452,
+                "location" : {
+                    "city" : "Little Rock, AR",
+                    "state" : "Arkansas"
+                }
+            }
+
+            /* 5 */
+            {
+                "totalPassengers" : 23701556,
+                "location" : {
+                    "city" : "Los Angeles, CA",
+                    "state" : "California"
+                }
+            }
+
