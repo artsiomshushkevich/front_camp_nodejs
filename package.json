@@ -1,0 +1,33 @@
+{
+  "name": "front_camp_nodejs",
+  "version": "1.0.0",
+  "description": "The bunch of tasks for the frontcamp",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --inspect index.js --exec babel-node --presets env",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artsiomshushkevich/front_camp_nodejs.git"
+  },
+  "keywords": [
+    "node.js",
+    "express",
+    "mongo"
+  ],
+  "author": "Artsiom Shushkevich <artemshushkevich@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artsiomshushkevich/front_camp_nodejs/issues"
+  },
+  "homepage": "https://github.com/artsiomshushkevich/front_camp_nodejs#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1",
+    "nodemon": "^1.14.11"
+  }
+}
