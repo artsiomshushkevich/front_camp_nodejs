@@ -1,6 +1,7 @@
 import express from 'express';
 import blogsRouter from './components/blogs/blogs.router';
 import path from 'path';
+import customLogger from './utils/custom-logger';
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use(express.urlencoded());
 app.use('/blogs', blogsRouter);
 
 app.use((req, res) => {
+    customLogger.warn(`Route ${req.url} is not te defined API route!`);
+    
     res.render('welcome');
 });
 
