@@ -2,37 +2,44 @@ import express from 'express';
 import BlogsModel from './blogs.model';
 
 const blogsRouter = express.Router();
-const blogsModel = new BlogsModel();
 
-blogsRouter.get('/', (req, res) => {
-    res.send(blogsModel.getAll());
+blogsRouter.get('/', async (req, res) => {
+    const blogs = await BlogsModel.find({});
+    res.send(blogs);
 });
 
-blogsRouter.get('/:id', (req, res) => {
-    res.send(blogsModel.getOneById(+req.params.id));
+blogsRouter.get('/:id', async (req, res) => {
+    const blog = await BlogsModel.findOne({_id: req.params.id});
+    res.send(blog);
 });
 
-blogsRouter.delete('/:id', (req, res) => {
-    res.send(blogsModel.deleteOneById(+req.params.id));
+blogsRouter.delete('/:id', async (req, res) => {
+    const result = await BlogsModel.remove({_id: req.params.id})
+    res.sendStatus(200);
 });
 
-blogsRouter.put('/:id', (req, res) => {
-    const updatedBlog = {
-        id: +req.params.id,
+blogsRouter.put('/:id', async (req, res) => {
+    const updatingResult = await BlogsModel.findOneAndUpdate(
+        {
+            _id: req.params.id
+        },
+        {
+            title: req.body.title,
+            article: req.body.article
+        }
+    );
+
+    res.send(updatingResult);
+});
+
+blogsRouter.post('/', async (req, res) => {
+    const newBlog = new BlogsModel({
         title: req.body.title,
         article: req.body.article
-    };
+    });
 
-    res.send(blogsModel.updateOne(updatedBlog));
-});
-
-blogsRouter.post('/', (req, res) => {
-    const newBlog = {
-        title: req.body.title,
-        article: req.body.article
-    };
-
-    res.send(blogsModel.insertOne(newBlog));
+    const savingResult = await newBlog.save();
+    res.send(savingResult);
 });
 
 export default blogsRouter;
