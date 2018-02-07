@@ -3,11 +3,17 @@ import blogsRouter from './components/blogs/blogs.router';
 import path from 'path';
 import customLogger from './utils/custom-logger';
 import mongo from './utils/mongo';
+import passport from './config/passport';
+import usersRouter from './components/users/users.router';
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded());
+
+app.use(passport.initialize());
+
+app.use('/users', usersRouter);
 
 app.use('/blogs', blogsRouter);
 

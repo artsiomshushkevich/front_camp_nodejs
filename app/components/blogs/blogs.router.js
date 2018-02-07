@@ -1,8 +1,10 @@
 import express from 'express';
 import BlogsModel from './blogs.model';
+import passport from '../../config/passport';
 
 const blogsRouter = express.Router();
 
+blogsRouter.use(passport.authenticate('jwt', {session: false}))
 blogsRouter.get('/', async (req, res, next) => {
     try {
         const blogs = await BlogsModel.find({});
