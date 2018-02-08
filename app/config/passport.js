@@ -3,19 +3,22 @@ import {Strategy as JWTStrategy, ExtractJwt} from 'passport-jwt';
 import {Strategy as LocalStrategy} from 'passport-local';
 import config from './config';
 import UsersModel from '../components/users/users.model';
+import bcrypt from 'bcrypt';
 
 passport.use(new LocalStrategy(
-    // {
-    //     session: false
-    // },
     async (username, password, done) => {
         try {
             const user = await UsersModel.findOne({username: username});
 
-            if (user && user.checkPassword(password)) {
-                done(null, user);
-            } else {
-                done(null, false);
+            if (user) {
+                const comparisonResult = await bcrypt.compare(password, user.passwordHash);
+                
+                if (comparisonResult) {
+                    done(null, user);
+                } else {
+                    done(null, false);
+                }
+               
             }
             
         } catch(err) {

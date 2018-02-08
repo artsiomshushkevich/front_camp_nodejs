@@ -38,11 +38,6 @@ usersRouter.post('/', async (req, res, next) => {
 usersRouter.post('/login', passport.authenticate('local', {session: false}), (req, res, next) => {
     const user = req.user;
 
-    // res.status(500).send({
-    //     errorMessage: 'User with such credentials was not found!'
-    // });
-    
-
     res.send({
         username: user.username,
         authToken: 'Bearer ' + getJWTFromUser(user)
