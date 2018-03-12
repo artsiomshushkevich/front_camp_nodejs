@@ -5,8 +5,11 @@ import customLogger from './utils/custom-logger';
 import mongo from './utils/mongo';
 import passport from './config/passport';
 import usersRouter from './components/users/users.router';
+import cors from 'cors';
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded());

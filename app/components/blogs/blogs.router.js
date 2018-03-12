@@ -27,8 +27,8 @@ blogsRouter.get('/:id', async (req, res, next) => {
 
 blogsRouter.delete('/:id', async (req, res, next) => {
     try {
-        const result = await BlogsModel.remove({_id: req.params.id})
-        res.sendStatus(200);
+        const result = await BlogsModel.findOneAndRemove({_id: req.params.id})
+        res.send(result);
     } catch(err) {
         next(err);
     }

@@ -16,8 +16,17 @@ const getJWTFromUser = (user) => {
     return jwt.sign(payload, config.secretKey);
 };
 
-usersRouter.post('/', async (req, res, next) => {
+usersRouter.post('/auth', async (req, res, next) => {
     try {
+        const existingUser = await UsersModel.findOne({username: req.body.username});
+
+        if (existingUser) {
+            return res.send({
+                username: existingUser.username,
+                authToken: 'Bearer ' + getJWTFromUser(existingUser)
+            });
+        }
+          
         const passwordHash = await bcrypt.hash(req.body.password, config.saltRounds);
         const newUser = new UsersModel({
             username: req.body.username,
@@ -35,14 +44,14 @@ usersRouter.post('/', async (req, res, next) => {
     }
 });
 
-usersRouter.post('/login', passport.authenticate('local', {session: false}), (req, res, next) => {
-    const user = req.user;
+// usersRouter.post('/login', passport.authenticate('local', {session: false}), (req, res, next) => {
+//     const user = req.user;
 
-    res.send({
-        username: user.username,
-        authToken: 'Bearer ' + getJWTFromUser(user)
-    });
+//     res.send({
+//         username: user.username,
+//         authToken: 'Bearer ' + getJWTFromUser(user)
+//     });
 
-});
+// });
 
 export default usersRouter;

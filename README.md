@@ -7,7 +7,7 @@ Set up:
 2. Run `npm start`
 
 Auth routes: 
-    - `/users` - registration route (need to pass `username` and `password` fields in a request body)
-    - `/login` - authorization route (test credentials: `username` - `lol123`, `password` - `12345678`)
+- `/users` - registration route (need to pass `username` and `password` fields in a request body)
+- `/login` - authorization route (test credentials: `username` - `lol123`, `password` - `12345678`)
 
 Note: after successful registration/authorization you will get a token which must be passed as value of the header `Authorization` for getting any blogs' data.
