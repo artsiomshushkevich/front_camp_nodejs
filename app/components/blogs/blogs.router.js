@@ -42,6 +42,9 @@ blogsRouter.put('/:id', async (req, res, next) => {
             {
                 title: req.body.title,
                 content: req.body.content
+            },
+            {
+                new: true
             }
         );
     
