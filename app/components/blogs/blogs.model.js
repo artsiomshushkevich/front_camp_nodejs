@@ -3,7 +3,11 @@ import mongo from '../../utils/mongo';
 const blogsSchema = new mongo.instance.Schema(
     { 
         title: String, 
-        article: String 
+        content: String,
+        createdAt: { 
+            type: Date, 
+            default: Date.now 
+        }
     },
     {
         versionKey: false

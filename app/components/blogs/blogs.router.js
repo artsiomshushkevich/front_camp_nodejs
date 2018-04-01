@@ -1,10 +1,8 @@
 import express from 'express';
 import BlogsModel from './blogs.model';
-import passport from '../../config/passport';
 
 const blogsRouter = express.Router();
 
-blogsRouter.use(passport.authenticate('jwt', {session: false}))
 blogsRouter.get('/', async (req, res, next) => {
     try {
         const blogs = await BlogsModel.find({});
@@ -43,7 +41,7 @@ blogsRouter.put('/:id', async (req, res, next) => {
             },
             {
                 title: req.body.title,
-                article: req.body.article
+                content: req.body.content
             }
         );
     
@@ -58,7 +56,7 @@ blogsRouter.post('/', async (req, res, next) => {
     try {
         const newBlog = new BlogsModel({
             title: req.body.title,
-            article: req.body.article
+            content: req.body.content
         });
     
         const savingResult = await newBlog.save();
